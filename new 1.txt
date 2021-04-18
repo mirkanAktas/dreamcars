@@ -1,0 +1,268 @@
+package com.example.app_tennis_club;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.TextView;
+
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public class Disponibilite extends AppCompatActivity {
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    CollectionReference courtRef = db.collection("Court_tennis");
+
+    CourtAdapter adapter;
+    String courtID;
+    public List<String> res = new ArrayList<String>();
+    public TextView textView;
+    TextView court1, court2, court3, court4, court5, court6;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_disponibilite);
+        SimpleDateFormat sdf = new SimpleDateFormat("hh : mm");
+
+        String date = getIntent().getStringExtra("date");
+        String heureDebut = getIntent().getStringExtra("heureDebut");
+        String heureFin = getIntent().getStringExtra("heureFin");
+
+        court1 = findViewById(R.id.txt_numero_court1);
+        court2 = findViewById(R.id.txt_numero_court2);
+//        court3 = findViewById(R.id.txt_numero_court3);
+//        court4 = findViewById(R.id.txt_numero_court4);
+//        court5 = findViewById(R.id.txt_numero_court5);
+//        court6 = findViewById(R.id.txt_numero_court6);
+
+        try {
+
+            Date deb = sdf.parse(heureDebut);
+            Date fin = sdf.parse(heureFin);
+            dispo(date, deb.getTime(), fin.getTime());
+        }
+        catch (ParseException ex) {
+            Log.d("TAG", "onCreate: " + ex);
+        }
+
+
+}
+
+private void dispo(String date, long heureDebut, long heureFin){
+
+        String terrain1ID = "3ErNvwSqkwSmaVQmVWuI";
+        String terrain2ID = "fIkN6m0lkxoDOjcFkycv";
+        String terrain3ID = "Deg5rI37B2GhedCAe71Y";
+        String terrain4ID = "gjHQ5lnyL9ar2ylYDp3I";
+        String terrain5ID = "IEsUpIprYD77DCUpGKAt";
+        String terrain6ID = "9typQCCkcjKvwXmxppWn";
+
+
+
+
+    db.collection("Court_tennis")
+            .document(terrain1ID)
+            .collection("Reservation")
+            .get()
+            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        @Override
+        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            if (task.isSuccessful()){
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("hh : mm");
+                    String date_donnee = document.get("date_reservation").toString();
+                    String heure_debut_donne = document.get("heure_debut_reservation").toString();
+                    String heure_fin_donnee = document.get("heure_fin_reservation").toString();
+                    try {
+                        Date deb = sdf.parse(heure_debut_donne);
+                        Date fin = sdf.parse(heure_fin_donnee);
+                        db.collection("Court_tennis")
+                                .document(terrain1ID)
+                                .collection("Reservation")
+                                .whereEqualTo("date_reservation", date)
+                                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (deb.getTime() > heureFin || fin.getTime() < heureDebut) {
+                                    db.collection("Court_tennis")
+                                            .whereEqualTo("court_numero", "1")
+                                            .get()
+                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                                        String ui = document.get("court_numero").toString();
+                                                        court1.setText(ui);
+
+                                                    }
+                                                }
+                                            });
+                                } else {
+                                    court1.setText("pas dispo");
+                                }
+                            }
+                        });
+
+                    }
+                    catch (ParseException ex) {
+                        Log.d("TAG", "onCreate: " + ex);
+                    }
+                }
+            } else {
+                Log.d("TAG", "Error getting documents: ", task.getException());
+            }
+
+        }
+    });
+
+
+    db.collection("Court_tennis")
+            .document(terrain2ID)
+            .collection("Reservation")
+            .get()
+            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()){
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            SimpleDateFormat sdf = new SimpleDateFormat("hh : mm");
+
+                            String heure_debut_donne = document.get("heure_debut_reservation").toString();
+                            String heure_fin_donnee = document.get("heure_fin_reservation").toString();
+                            try {
+                                Date deb = sdf.parse(heure_debut_donne);
+                                Date fin = sdf.parse(heure_fin_donnee);
+                                db.collection("Court_tennis")
+                                        .document(terrain2ID)
+                                        .collection("Reservation")
+                                        .whereEqualTo("date_reservation", date)
+                                        .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (deb.getTime() > heureFin || fin.getTime() < heureDebut) {
+                                            db.collection("Court_tennis")
+                                                    .whereEqualTo("court_numero", "2")
+                                                    .get()
+                                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                                String ui = document.get("court_numero").toString();
+                                                                court2.setText(ui);
+
+                                                            }
+                                                        }
+                                                    });
+                                        } else {
+                                            court2.setText("pas dispo");
+                                            Log.d("TAG", "onComplete: Heure pas dispo");
+                                        }
+                                    }
+                                });
+
+                            }
+                            catch (ParseException ex) {
+                                Log.d("TAG", "onCreate: " + ex);
+                            }
+                        }
+                    } else {
+                        Log.d("TAG", "Error getting documents: ", task.getException());
+                    }
+
+                }
+            });
+
+
+
+
+
+
+}
+
+    public void setupRecyclerView(){
+        Query query = courtRef.orderBy("court_numero", Query.Direction.DESCENDING);
+        FirestoreRecyclerOptions<CourtTennis> option = new FirestoreRecyclerOptions.Builder<CourtTennis>()
+                .setQuery(query, CourtTennis.class)
+                .build();
+
+        adapter = new CourtAdapter(option);
+
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+    }
+
+
+//    private void dispo(String date) {
+//        String heure_debut = "heure_debut_reservation";
+//        String heure_fin = "heure_fin_reservation";
+//
+//        Query query = courtRef.orderBy("date_reservation", Query.Direction.DESCENDING);
+//        FirestoreRecyclerOptions<ReservationObj> option = new FirestoreRecyclerOptions.Builder<ReservationObj>()
+//                .setQuery(query, ReservationObj.class)
+//                .build();
+//
+//        adapter = new ReservationAdapter(option);
+//
+//        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+//        recyclerView.setHasFixedSize(true);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+//        recyclerView.setAdapter(adapter);
+//    }
+
+//    private void dispo(String date) {
+//        courtRef.document("3ErNvwSqkwSmaVQmVWuI")
+//                .collection("Reservation").get()
+//                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+//                        String data = "";
+//                        Class<ReservationObj> t = ReservationObj.class;
+//                        for (String i : t){
+//                            Log.d("TAG", "onSuccess: " + t);
+//                        }
+//                        for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+//                            CourtTennis courtTennis = documentSnapshot.toObject(CourtTennis.class);
+//                            courtTennis.setDocumentId(documentSnapshot.getId());
+//
+//                            String documentId = courtTennis.getDocumentId();
+//                            Log.d("TAG", "onSuccess: " + documentSnapshot);
+//
+//                            data += "ID : " + documentId;
+//
+//                        }
+//                        textView.setText(data);
+//                    }
+//                });
+//
+//        Task<QuerySnapshot> queryres = db.collection("Court_tennis").document("3ErNvwSqkwSmaVQmVWuI")
+//                .collection("Reservation").whereEqualTo("date_reservation", "29-04-2021").get();
+//    }
+
+
+//    @Override
+//    protected void onResume() {
+//        super.onStart();
+//        adapter.startListening();
+//    }
+
+
+
+}
